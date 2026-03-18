@@ -9,7 +9,8 @@ CLIENT_ID = os.environ.get("CLIENT_ID")
 
 DHAN_URL = "https://api.dhan.co/orders"
 
-def place_order(option_type):
+
+def place_order():
     payload = {
         "dhanClientId": CLIENT_ID,
         "transactionType": "BUY",
@@ -17,7 +18,7 @@ def place_order(option_type):
         "productType": "INTRADAY",
         "orderType": "MARKET",
         "validity": "DAY",
-        "securityId": "NIFTY",  # temporary
+        "securityId": "NIFTY",
         "quantity": 65
     }
 
@@ -26,11 +27,11 @@ def place_order(option_type):
         "Content-Type": "application/json"
     }
 
-    print("Sending order to Dhan:", payload)
+    print("Sending order to Dhan")
 
     response = requests.post(DHAN_URL, json=payload, headers=headers)
 
-    print("Dhan response:", response.text)
+    print("Response:", response.text)
 
     return response.text
 
@@ -42,11 +43,8 @@ def webhook():
 
     action = data.get("action")
 
-    if action == "BUY_CE":
-        return place_order("CE")
-
-    elif action == "BUY_PE":
-        return place_order("PE")
+    if action in ["BUY_CE", "BUY_PE"]:
+        return place_order()
 
     elif action == "EXIT":
         return jsonify({"status": "exit received"})
@@ -55,6 +53,5 @@ def webhook():
 
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
